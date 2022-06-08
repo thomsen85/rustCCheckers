@@ -1,7 +1,8 @@
 use std::sync::{Arc, Weak, Mutex};
 use crate::board::Move;
+use serde_derive::{Serialize, Deserialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub mov: Move,
     parent: Option<Weak<Mutex<Node>>>,
@@ -43,7 +44,7 @@ impl Node {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Tree {
     pub root: Arc<Mutex<Node>>
 }
@@ -77,6 +78,18 @@ impl Tree {
         }
 
         parent.lock().unwrap().backpropegate(result);
+    }
+
+    pub fn save_to_csv(&self){
+        let csv_header = String::from("ID, DATA, PARENT\n");
+        //csv_header.push_str(Self::make_csv_string(self.root.lock().unwrap().children, 0))
+
+    }
+
+    fn make_csv_string(children: Vec<Node>, current_id: u32) -> String {
+        let string = String::new();
+
+        string 
     }
 }
 pub mod tests {

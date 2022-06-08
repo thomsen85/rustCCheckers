@@ -7,7 +7,9 @@ use crate::board::*;
 use crate::mcts::Tree;
 use std::sync::{Arc, Mutex};
 
-const NUM_OF_TRAINS: usize = 10_000;
+const NUM_OF_TRAINS: usize = 100_000;
+
+const CLOSE_MOVE_PERCENTAGE: usize = 70;
 
 pub fn start() {
     let time = Instant::now();
@@ -73,7 +75,7 @@ fn training() -> (Vec<Move>, i8){
     let mut moves: Vec<Move> = Vec::with_capacity(300);
 
     while !board.is_won() {
-        if rng.gen_range(0..100) > 20 {
+        if rng.gen_range(0..100) < CLOSE_MOVE_PERCENTAGE {
             let mov = board.closest_move(player);
             board.move_pice(mov);
             moves.push(mov);
@@ -90,7 +92,7 @@ fn training() -> (Vec<Move>, i8){
         } 
         counter += 1;
 
-        if counter > 600 {
+        if counter > 300 {
             break;
         }
     }
