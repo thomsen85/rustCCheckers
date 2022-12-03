@@ -11,6 +11,7 @@ pub struct Board {
 
 }
 
+#[inline]
 fn delta_distance(pre_move: Point, post_move: Point, to: Point) -> i32 {
     let v_pre = ((pre_move.0 - to.0) as i32).pow(2) + ((pre_move.1 - to.1) as i32).pow(2);
     let v_post = ((post_move.0 - to.0) as i32).pow(2) + ((post_move.1 - to.1) as i32).pow(2);
@@ -90,18 +91,36 @@ impl Board {
         let mut best_moves: Vec<(Point, Point)> = Vec::new();
 
         for pos in self.get_player_positons(player) {
+            /* 
+            
             let best = self.get_legal_moves(pos, false, Vec::new(), 0)
                 .into_iter()
                 .max_by(|&m1, &m2| delta_distance(pos, m1, opponent_point).cmp(&delta_distance(pos, m2, opponent_point)));
+            */
+            
+            let best = {
+                let mut max = -1000;
+                let mut max_point = (0,0);
+                for mov in self.get_legal_moves(pos, false, Vec::new(), 0) {
+                    let dist = delta_distance(pos, mov, opponent_point);
+                    if dist > max {
+                        max = dist;
+                        max_point = mov;
+                    }
+                }
+                if max == 0 {
+                    None
+                } else {
+                    Some(max_point)
+                }
+            };
+            
                         
             if let Some(mov) = best {
                 best_moves.push((pos, mov));
             }
+            
         }
-        // TODO: can be optimized
-        for mov in best_moves.clone() {
-            //println!("{:?}: {}", mov, delta_distance(mov.0, mov.1, opponent_point))
-        } 
 
         best_moves
             .into_iter()
