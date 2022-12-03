@@ -1,0 +1,2 @@
+# rustCCheckers
+Chinese Checkers AI
