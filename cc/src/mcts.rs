@@ -83,15 +83,16 @@ impl Tree {
     pub fn save_to_csv(&self){
         let csv_header = String::from("ID, DATA, PARENT\n");
         //csv_header.push_str(Self::make_csv_string(self.root.lock().unwrap().children, 0))
+        unimplemented!();
 
     }
 
     fn make_csv_string(children: Vec<Node>, current_id: u32) -> String {
         let string = String::new();
-
-        string 
+        unimplemented!();
     }
 }
+
 pub mod tests {
     use super::*;
     

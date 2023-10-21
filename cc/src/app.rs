@@ -1,7 +1,7 @@
-use text_io::read;
-use std::thread;
 use rand::Rng;
+use std::thread;
 use std::time::Instant;
+use text_io::read;
 
 use crate::board::*;
 use crate::mcts::Tree;
@@ -13,11 +13,14 @@ const CLOSE_MOVE_PERCENTAGE: usize = 70;
 
 pub fn start() {
     let time = Instant::now();
+
     let num_of_cpu = num_cpus::get();
     println!("Num of threads = {}", num_of_cpu);
+
     let ex_per_thread = NUM_OF_TRAINS / num_of_cpu;
     println!("Num of sims running = {}", ex_per_thread * num_of_cpu);
-    let mut threads = Vec::with_capacity(num_of_cpu); 
+
+    let mut threads = Vec::with_capacity(num_of_cpu);
 
     let tree = Arc::new(Mutex::new(Tree::new()));
 
@@ -29,7 +32,6 @@ pub fn start() {
             let mut plays: usize = 0;
 
             for _ in 0..ex_per_thread {
-
                 let (moves, result) = training();
 
                 if result == 1 {
@@ -40,7 +42,7 @@ pub fn start() {
 
                 tree.lock().unwrap().add_game(moves, result);
 
-            plays += 1;
+                plays += 1;
             }
             (wins, lost, plays)
         }));
@@ -57,22 +59,30 @@ pub fn start() {
         plays += p;
     }
 
-    println!("W: {}, D: {}, L: {}, P: {}", wins, plays-wins-lost, lost, plays);
-    let res =  tree.lock().unwrap().root.lock().unwrap().result;
+    println!(
+        "W: {}, D: {}, L: {}, P: {}",
+        wins,
+        plays - wins - lost,
+        lost,
+        plays
+    );
+    let res = tree.lock().unwrap().root.lock().unwrap().result;
     let p = tree.lock().unwrap().root.lock().unwrap().plays;
     let size = std::mem::size_of_val(&*tree);
-    println!("Tree: R: {}, P: {}, mem: {}", res , p, size);
+    println!("Tree: R: {}, P: {}, mem: {}", res, p, size);
     println!("Took: {} sec", time.elapsed().as_secs_f64());
 }
 
-fn training() -> (Vec<Move>, i8){
+fn training() -> (Vec<Move>, i8) {
     let mut board = Board::new();
+
     board.add_player(PLAYER_1_POS, 1);
     board.add_player(PLAYER_2_POS, 2);
+
     let mut rng = rand::thread_rng();
     let mut player = 1;
     let mut counter = 0;
-    let mut moves: Vec<Move> = Vec::with_capacity(300);
+    let mut moves: Vec<Move> = Vec::with_capacity(400);
 
     while !board.is_won() {
         if rng.gen_range(0..100) < CLOSE_MOVE_PERCENTAGE {
@@ -89,43 +99,44 @@ fn training() -> (Vec<Move>, i8){
             player = 2;
         } else {
             player = 1;
-        } 
+        }
         counter += 1;
 
-        if counter > 300 {
+        if counter > 400 {
             break;
         }
     }
-    
+
     // println!("{}", board.to_string());
     let mut result: i8 = 0;
     if board.is_won() {
-        if board.player_in_other_terretory(0) {
-            result = 1;
-        } else {
-            result = -1;
-        }
-    } 
+        result = get_winner(&board);
+    }
     (moves, result)
 }
 
-fn test() {
+fn get_winner(board: &Board) -> i8 {
+    if board.player_in_other_terretory(0) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
 
+fn test() {
     let mut board = Board::new();
     board.add_player(PLAYER_1_POS, 1);
     board.add_player(PLAYER_2_POS, 2);
 
     println!("{}", board.to_string());
-
 }
-
 
 fn manual() {
     let mut board = Board::new();
 
     board.add_player(PLAYER_1_POS, 1);
     board.add_player(PLAYER_2_POS, 2);
-    
+
     let mut inp: i8 = 0;
 
     while inp != -1 {
@@ -138,11 +149,28 @@ fn manual() {
     }
 }
 
+const PLAYER_1_POS: [Point; 10] = [
+    (12, 0),
+    (11, 1),
+    (13, 1),
+    (10, 2),
+    (12, 2),
+    (14, 2),
+    (9, 3),
+    (11, 3),
+    (13, 3),
+    (15, 3),
+];
 
-const PLAYER_1_POS: [Point; 10] = [(12,0), (11,1), (13, 1), (10, 2),
-      (12, 2), (14,2), (9, 3), (11, 3), (13, 3), (15, 3)];
-
-const PLAYER_2_POS: [Point; 10] = [(12,16), (11, 15), (13, 15), (10, 14), (12, 14), (14, 14),
-                (9, 13), (11, 13), (13, 13), (15, 13)];
-
-
+const PLAYER_2_POS: [Point; 10] = [
+    (12, 16),
+    (11, 15),
+    (13, 15),
+    (10, 14),
+    (12, 14),
+    (14, 14),
+    (9, 13),
+    (11, 13),
+    (13, 13),
+    (15, 13),
+];
