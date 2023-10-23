@@ -3,10 +3,40 @@ use rand::prelude::*;
 pub type Point = (i8, i8);
 pub type Move = (Point, Point);
 
+pub const INVALID: i8 = -1;
+pub const EMPTY: i8 = 0;
+
+pub const PLAYER_1_POS: [Point; 10] = [
+    (12, 0),
+    (11, 1),
+    (13, 1),
+    (10, 2),
+    (12, 2),
+    (14, 2),
+    (9, 3),
+    (11, 3),
+    (13, 3),
+    (15, 3),
+];
+
+pub const PLAYER_2_POS: [Point; 10] = [
+    (12, 16),
+    (11, 15),
+    (13, 15),
+    (10, 14),
+    (12, 14),
+    (14, 14),
+    (9, 13),
+    (11, 13),
+    (13, 13),
+    (15, 13),
+];
+
+#[derive(Debug)]
 pub struct Board {
-    width: i8,
-    height: i8,
-    board: [[i8; 25]; 17],
+    pub width: i8,
+    pub height: i8,
+    pub board: [[i8; 25]; 17],
     players_start_pos: Vec<[Point; 10]>,
 }
 
@@ -164,7 +194,7 @@ impl Board {
             let best = {
                 let mut max = i32::MIN;
                 let mut max_point = (0, 0);
-                for mov in self.get_legal_moves(pos, false, Vec::new(), 0) {
+                for mov in self.get_legal_moves(pos) {
                     let dist = delta_distance(pos, mov, opponent_point);
                     if dist > max {
                         max = dist;
@@ -199,7 +229,7 @@ impl Board {
         let mut moves: Vec<(Point, Point)> = Vec::new();
 
         for pos in self.get_player_positons(player) {
-            for mov in self.get_legal_moves(pos, false, Vec::new(), 0) {
+            for mov in self.get_legal_moves(pos) {
                 moves.push((pos, mov));
             }
         }
@@ -207,7 +237,7 @@ impl Board {
         moves[thread_rng.gen_range(0..moves.len())]
     }
 
-    pub fn get_legal_moves(
+    fn _get_legal_moves(
         &self,
         point: Point,
         jump: bool,
@@ -233,14 +263,17 @@ impl Board {
                 if let Some(over_point) = self.get_coord_over_piece(point, surr_point) {
                     if !prev.contains(&over_point) && self.get(over_point) == 0 {
                         prev.push(point);
-                        //println!("{}At {:?}, Checking: {:?}"," ".repeat(dim as usize), surr_point, over_point);
-                        moves.extend(self.get_legal_moves(over_point, true, prev.clone(), dim + 1))
+                        moves.extend(self._get_legal_moves(over_point, true, prev.clone(), dim + 1))
                     }
                 }
             }
         }
         prev.clear();
         moves
+    }
+
+    pub fn get_legal_moves(&self, point: Point) -> Vec<Point> {
+        self._get_legal_moves(point, false, Vec::new(), 0)
     }
 
     pub fn get_player_positons(&self, player: i8) -> [Point; 10] {

@@ -1,2 +1,2 @@
 # rustCCheckers
-Chinese Checkers AI
+Chinese Checkers AI and Player written completely in rust
