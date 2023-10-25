@@ -1,8 +1,11 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use cc::Board;
 
+use crate::WorldPosClick;
+
 use super::components::*;
 use super::constants::*;
+use super::events::BoardClick;
 use super::resources;
 
 pub fn setup_board(
@@ -25,14 +28,29 @@ pub fn setup_board(
                         ..Default::default()
                     },
                     Empty {
-                        x: x as i8,
-                        y: y as i8,
+                        point: (x as i8, y as i8),
                     },
                 ));
             }
         }
     }
 }
+
+pub fn board_click(
+    mut board_click_event: EventWriter<BoardClick>,
+    mut world_pos_click: EventReader<WorldPosClick>,
+    empty_squares: Query<(&Empty, &Transform)>,
+) {
+    for world_pos in world_pos_click.iter() {
+        for (piece, transform) in empty_squares.iter() {
+            if (transform.translation.truncate() - world_pos.0).length() < EMPTY_RADIUS {
+                board_click_event.send(BoardClick { point: piece.point });
+                break;
+            }
+        }
+    }
+}
+
 fn get_transform_for_empty(x: i8, y: i8, c_board: &Board) -> Transform {
     let transform = Transform::from_xyz(
         (x as f32 - (c_board.width as f32) / 2.) * 25.,

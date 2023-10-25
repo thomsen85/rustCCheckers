@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cc::Point;
 
-#[derive(Component)]
-pub struct Empty {
+#[derive(Event)]
+pub struct BoardClick {
     pub point: Point,
 }
