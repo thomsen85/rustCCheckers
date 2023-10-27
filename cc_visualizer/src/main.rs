@@ -3,12 +3,19 @@ use bevy::{prelude::*, window::PrimaryWindow};
 mod ai;
 mod board;
 mod piece;
+
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.96, 0.96, 0.96);
 
 fn main() {
     App::new()
         .add_event::<WorldPosClick>()
-        .add_plugins((DefaultPlugins, board::BoardPlugin, piece::PiecePlugin))
+        .add_state::<GameState>()
+        .add_plugins((
+            DefaultPlugins,
+            board::BoardPlugin,
+            piece::PiecePlugin,
+            ai::AiPlugin,
+        ))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_systems(PreUpdate, world_pos_click)
         .add_systems(Startup, setup)
@@ -21,6 +28,14 @@ struct MainCamera;
 #[derive(Event)]
 pub struct WorldPosClick(Vec2);
 
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+pub enum GameState {
+    #[default]
+    MainMenu,
+    HumanVsHuman,
+    HumanVsAi,
+    AiVsAi,
+}
 fn setup(mut commands: Commands) {
     commands.spawn((Camera2dBundle { ..default() }, MainCamera));
 }

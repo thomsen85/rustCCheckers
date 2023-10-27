@@ -1160,6 +1160,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "cc 0.1.0",
+ "rand",
 ]
 
 [[package]]
